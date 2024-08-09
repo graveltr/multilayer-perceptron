@@ -97,9 +97,9 @@ int main() {
   for (int i = 0; i < num_training_images; i++) {
     images[i] = (int *)malloc(num_pixels_per_image * sizeof(int));
   }
-
   read_in_training_data(images, labels, num_training_images);
 
+  // Print the data to verify it was read in properly.
   for (int i = 0; i < num_training_images; i++) {
     printf("leading data: ");
     for (int j = 0; j < 10; j++) {
