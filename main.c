@@ -1,36 +1,65 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+float **allocate_matrix(int rows, int cols) {
+  float **mat = (float **)malloc(rows * sizeof(float *));
+  if (mat == NULL) {
+    perror("malloc");
+  }
 
-// The layer sizes from left to right.
-// 784 corresponds to the number of pixels
-// in the images from the database. 10 
-// corresponds to the number of possible outputs,
-// namely the digits 0-9. The two internal layers
-// are arbitrarily set to size 16 each. 
-#define INPUT_LAYER_SIZE 784
-#define OUTPUT_LAYER_SIZE 10
-#define INTERNAL_LAYER_ONE_SIZE 16
-#define INTERNAL_LAYER_TWO_SIZE 16
+  for (int i = 0; i < rows; i++) {
+    mat[i] = (float *)malloc(cols * sizeof(float));
+    if (mat[i] == NULL) {
+      perror("malloc");
+    }
+  }
 
-#define MAX_LAYER_SIZE 784
+  return mat;
+}
 
-#define NUM_CONNECTION_FABRICS 3
+void free_matrix(float **mat, int rows) {
+  for (int i = 0; i < rows; i++) {
+    free(mat[i]);
+  }
+  free(mat);
+}
 
-void print_weights(float arr[NUM_CONNECTION_FABRICS][MAX_LAYER_SIZE][MAX_LAYER_SIZE]) {
-  for(int i = 0; i < NUM_CONNECTION_FABRICS; i++) {
-    printf("Printing connections for layer %d \n", i);
-    for(int j = 0; j < MAX_LAYER_SIZE; j++) {
-      for(int k = 0; k < MAX_LAYER_SIZE; k++) {
-        printf("%f ", arr[i][j][k]);
+int main() {
+  int layer_sizes[] = {784, 16, 16, 10};
+  int num_layers = sizeof(layer_sizes) / sizeof(layer_sizes[0]);
+
+  float ***weights = (float ***)malloc((num_layers - 1) * sizeof(float **));
+  if (weights == NULL) {
+    perror("malloc");
+    return 1;
+  }
+
+  for (int i = 0; i < num_layers - 1; i++) {
+    weights[i] = allocate_matrix(layer_sizes[i], layer_sizes[i + 1]);
+  }
+
+  for (int i = 0; i < num_layers - 1; i++) {
+    for (int j = 0; j < layer_sizes[i]; j++) {
+      for (int k = 0; k < layer_sizes[i + 1]; k++) {
+        weights[i][j][k] = (float)rand() / RAND_MAX;
+      }
+    }
+  }
+
+  for (int i = 1; i < 2; i++) {
+    for (int j = 0; j < layer_sizes[i]; j++) {
+      for (int k = 0; k < layer_sizes[i + 1]; k++) {
+        printf("%f", weights[i][j][k]);
       }
       printf("\n");
     }
   }
-}
 
-int main() {
-  // We preallocate a 3D array to keep track of the weights.
-  float weights[NUM_CONNECTION_FABRICS][MAX_LAYER_SIZE][MAX_LAYER_SIZE] = {0};
-  print_weights(weights);
+  for (int i = 0; i < num_layers - 1; i++) {
+    free_matrix(weights[i], layer_sizes[i]);
+  }
+  free(weights);
+
   return 0;
 }
